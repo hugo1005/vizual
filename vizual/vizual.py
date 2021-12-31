@@ -10,7 +10,6 @@ import os
 
 def main():
     args = docopt.docopt(__doc__)
-    print(args)
     target = args['--file'] # something.py filepath relative to the terminal.
     server = os.path.dirname(__file__) + '/server.py'
 
