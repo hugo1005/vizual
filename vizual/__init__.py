@@ -1,2 +1,2 @@
-from vizual import client
-from vizual import server
+from vizual.client import Client
+from vizual.server import Server
