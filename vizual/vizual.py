@@ -1,12 +1,17 @@
-#(trap 'kill 0' SIGINT; python3 `pwd`/$1 & python3 `dirname $0`/server.py)
+"""Runs the debug server on the dersire file
 
-import os
+Usage:
+    vizual [--file=FILE]
+    
+"""
+
 import docopt
+import os
 
 def main():
     args = docopt.docopt(__doc__)
     print(args)
-    target = args['--exec'] # something.py filepath relative to the terminal.
+    target = args['--file'] # something.py filepath relative to the terminal.
     server = os.path.dirname(__file__) + '/server.py'
 
     cmd = "(trap 'kill 0' SIGINT; python3 " + target + " & python3 " + server + ")"
