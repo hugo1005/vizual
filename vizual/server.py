@@ -9,8 +9,8 @@ tasks = []
 
 app = Flask(__name__)
 # Disable flask printing
-log = logging.getLogger('werkzeug')
-log.disabled = True
+# log = logging.getLogger('werkzeug')
+# log.disabled = True
 
 @app.route("/", methods=['GET'])
 def index():
