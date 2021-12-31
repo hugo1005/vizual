@@ -1,0 +1,2 @@
+graft vizual/static
+global-exclude *.pyc
