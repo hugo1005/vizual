@@ -12,10 +12,10 @@ setup(
       packages=['vizual'],
       entry_points={
             'console_scripts': [
-                  'vizual = vizual.vizual',
+                  'vizual = vizual.vizual:main',
             ],
       },
-      install_requires=['Flask','requests'], # add any additional packages that
+      install_requires=['Flask','requests','docopt'], # add any additional packages that
       # needs to be installed along with your package. Eg: 'caer'
       
       keywords=['python', 'debugging', 'webapp', 'visual'],
