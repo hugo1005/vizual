@@ -1,5 +1,5 @@
 # Vizual
-Web based debug tools for easy cleant statement based debugging in python.
+Web / CLI based debug tools for easy cleant statement based debugging in python.
 
 ## Installation
 
@@ -62,6 +62,15 @@ def do_step(...):
 def f(...):
   do_step(...)
   return ...
+```
+
+## Running Vizual
+
+### Command Line Interaface
+Navigate to your python file in the terminal and run
+
+```
+vizual --file file_to_debug.py
 ```
 
 ### Accessing the web app
