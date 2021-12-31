@@ -10,7 +10,7 @@ setup(
       description="Clean visual debugging suite for python",
       long_description="See readme file",
       packages=['vizual'],
-      scripts=['vizual'],
+      scripts=['v-serve'],
       install_requires=['Flask','requests'], # add any additional packages that
       # needs to be installed along with your package. Eg: 'caer'
       
