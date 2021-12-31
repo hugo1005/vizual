@@ -15,6 +15,9 @@ setup(
                   'vizual = vizual.vizual:main',
             ],
       },
+      package_data = {
+            'static': ['*'],
+      },
       install_requires=['Flask','requests','docopt'], # add any additional packages that
       # needs to be installed along with your package. Eg: 'caer'
       
