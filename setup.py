@@ -15,8 +15,8 @@ setup(
                   'vizual = vizual.vizual:main',
             ],
       },
-      url = 'https://github.com/hugo1005/vizual',
       # This needs to be changed on each new release
+      url = 'https://github.com/hugo1005/vizual',
       download_url = 'https://github.com/hugo1005/vizual/archive/refs/tags/Beta.tar.gz',
       include_package_data=True,
       install_requires=['Flask','requests','docopt'], # add any additional packages that
