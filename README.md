@@ -16,7 +16,7 @@
 
 To install
 ```
-pip install git+https://github.com/hugo1005/vizual.git
+pip install vizual
 ```
 
 To uninstall 
