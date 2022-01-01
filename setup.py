@@ -7,7 +7,7 @@ setup(
       version="0.0.1",
       author="Hugo Dolan",
       author_email="<hugojdolan@gmail.com>",
-      description="Clean visual debugging suite for python",
+      description="Web UI and decorator synatx for print statement debugging",
       long_description="See readme file",
       packages=['vizual'],
       entry_points={
