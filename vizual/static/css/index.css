@@ -1,24 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Mono&display=swap');
 
 ::-webkit-scrollbar {
-    width: 10px;
-  }
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(30,30,30);
+  border-left: .1px solid rgba(136, 136, 136, 0.308)
+}
   
-  /* Track */
-  ::-webkit-scrollbar-track {
-    background: rgb(30,30,30);
-    border-left: .1px solid rgba(136, 136, 136, 0.308)
-  }
-   
-  /* Handle */
-  ::-webkit-scrollbar-thumb {
-    background: #888; 
-  }
-  
-  /* Handle on hover */
-  ::-webkit-scrollbar-thumb:hover {
-    background: #555; 
-  }
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
 
 
 body {
@@ -27,11 +24,16 @@ body {
 
     font-family: 'Roboto', sans-serif;
     font-size: 10pt;
+    background:rgb(17, 17, 17);
+
+    overflow: hidden;
 }
 
 #debug_panel {
     width: 100vw;
     height: 100vh;
+    padding-bottom: 32px;
+    box-sizing: border-box;
 }
 
 #channels {
@@ -52,15 +54,50 @@ body {
     background-color: rgb(30,30,30);
 }
 
+.data_display {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  background-color: rgb(30,30,30);
+  font-family: 'Roboto Mono', monospace;
+  overflow-x: hidden;
+  border-bottom: 1px solid rgba(136, 136, 136, 0.308);
+}
+
 #channel_display {
-    height: 95%;
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-    background-color: rgb(30,30,30);
-    font-family: 'Roboto Mono', monospace;
-    overflow-y:scroll;
-    overflow-x: hidden;
+  height:  60%;
+  overflow-y: scroll;
+}
+
+#performance_display {
+  height: 35%;
+  overflow-y: scroll;
+  padding: 8px;
+}
+
+table {
+  width: 100%;
+  color: white;
+  text-align: left;
+  font-family: 'Roboto', sans-serif;
+  border-collapse:collapse;
+  border: 0;
+}
+
+th,td  {
+  height: 24px;
+  margin: 0;
+  padding: 8px;
+}
+th {
+  color: rgb(182, 182, 182);
+}
+td {
+  color: rgb(140,140,140);
+}
+
+tr:nth-child(even) {
+  background-color: rgb(37,37,37);
 }
 
 #status_bar {

@@ -9,15 +9,20 @@
         <div id='channels'>
             <!-- <div id='<channel-id>' 
                 class='channel ?selected'> <channel-id> </div>-->
-        </div>
-        <div id='channel_display'>
+        </div>  
+        <div id='channel_display' class='data_display'>
     
         </div>
-        <div id='status_bar'>
-            <div id='clear_btn' onclick="actions.clear_channels()">CLEAR</div>
-            <div id='task'>
+        <div id='performance_display' class='data_display'>
+            <table id='performance_display_table'>
                 
-            </div>
+            </table>
+        </div>
+    </div>
+    <div id='status_bar'>
+        <div id='clear_btn' onclick="actions.clear_channels()">CLEAR</div>
+        <div id='task'>
+            
         </div>
     </div>
     <script>
@@ -59,6 +64,7 @@
         // HTML Elements
         elem_channels = findElem('channels')
         elem_channel_display = findElem('channel_display')
+        elem_perf_display_tbl = findElem('performance_display_table')
         elem_task = findElem('task')
 
         // Templates
@@ -74,6 +80,21 @@
             <div id='task_bar'>
                 <div id='task_inner' style="width:${100*(task.progress/task.total_iters)}%"></div>
             </div>`
+        
+        perf_tabl_base = `<tr>
+                <th>Function name</th>
+                <th># Calls</th>
+                <th>Avg Duration</th>
+                <th>Total Time</th>
+            </tr>`
+
+        template_perf_tbl = perf => `
+                <tr>
+                    <td>${perf.function_name}</td>
+                    <td>${perf.n_calls}</td>
+                    <td>${perf.avg_duration}</td>
+                    <td>${perf.avg_duration * perf.n_calls}</td>
+                </tr>`
 
         // App State
         state = {channel_ids: get('channels'), active_channel: ''}
@@ -82,6 +103,12 @@
         function update_channel_body (cid) {
             get(`/channels/${cid}`).then(msgs => {
                 elem_channel_display.innerHTML = getHTML(template_channel_msg, msgs)
+            })
+
+            get(`/timing/${cid}`).then(data => {
+                func_names = Object.keys(data)
+                perf_list = func_names.map(f_name => {return {...data[f_name], function_name: f_name }})
+                elem_perf_display_tbl.innerHTML = perf_tabl_base +  getHTML(template_perf_tbl, perf_list)
             })
         }
 

@@ -7,21 +7,34 @@ class Vizual:
     def __init__(self, server_ip='http://0.0.0.0:8080'):
         sleep(1)
         self._ip = server_ip
-        self._ping_context = ''
+        self._channel_context = ''
+        self._context_stack = []
 
     def _register_channel(self, channel):
         requests.post(self._ip + '/channels/%s' % channel, json=None)
 
     def _send_debug_message(self, channel, msg):
         requests.post(self._ip + '/channels/%s' % channel, json=msg)
-        self._ping_context = channel
+
+    def _set_channel_context(self, channel):
+        self._context_stack.append(channel)
+
+    def _get_channel_context(self):
+        return self._context_stack[-1]
+
+    def _pop_channel_context(self):
+        self._context_stack.pop(-1)
 
     def debug(self, channel, template, color='#fff', display_output=True): 
         self._register_channel(channel)
 
         def debug_decorator(func):
             def wrapper(*args, **kwargs):
+                # Frist set the context
+                self._set_channel_context(channel)
                 evaluation = func(*args, **kwargs)
+                self._pop_channel_context()
+
                 content = template % evaluation if display_output else template
 
                 msg = {
@@ -85,8 +98,29 @@ class Vizual:
                         'format': {'color': color}
                     }
                     
-                    requests.post(self._ip + '/channels/%s' % self._ping_context, json=msg)
+                    requests.post(self._ip + '/channels/%s' % self._get_channel_context(), json=msg)
 
                 return criteria_met
             return wrapper
         return ping_decorator
+
+    def time(self):
+        def time_decorator(func):
+            def wrapper(*args, **kwargs):
+                channel = self._get_channel_context()
+                
+                a = time()
+                eval = func(*args, **kwargs)
+                b = time()
+
+                msg = {
+                    'channel': channel,
+                    'function': func.__name__,
+                    'duration': b - a,
+                }
+                    
+                requests.post(self._ip + '/timing', json=msg)
+
+                return eval
+            return wrapper
+        return time_decorator

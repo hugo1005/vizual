@@ -1,0 +1,1 @@
+python3 vizual/vizual.py --file test.py

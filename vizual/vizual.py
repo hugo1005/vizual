@@ -11,7 +11,7 @@ import os
 def main():
     args = docopt.docopt(__doc__)
     target = args['--file'] # something.py filepath relative to the terminal.
-    server = os.path.dirname(__file__) + '/server.py'
+    server = os.path.join(os.path.dirname(__file__), 'server.py')
 
     cmd = "(trap 'kill 0' SIGINT; python3 " + target + " & python3 " + server + ")"
 

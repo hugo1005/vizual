@@ -4,6 +4,7 @@ import logging
 
 # Server Side
 debug_log = {}
+timing_log = {}
 MAIN_TASK = {'task_name':'Main', 'progress':0, 'total_iters': 1}
 tasks = []
 
@@ -23,7 +24,6 @@ def stylesheets(name):
 @app.route("/assets/<name>", methods=['GET'])
 def assets(name):
     return app.send_static_file("./assets/%s" % name)
-
 
 @app.route('/channels', methods=['GET'])
 @app.route('/channels/<name>', methods=['GET', 'POST'])
@@ -79,6 +79,40 @@ def task(msgtype=None):
                 tasks.pop(0)
 
             return 'Task Progressed'
+
+@app.route('/timing', methods=['POST'])
+@app.route('/timing/<channel>', methods=['GET'])
+def timing(channel=None):
+    global timing_log
+
+    if request.method == 'GET':
+        return jsonify(timing_log[channel] if channel in timing_log else {})
+    if request.method == 'POST':
+        msg = request.json
+
+        channel = msg['channel']
+        if channel not in timing_log:
+            timing_log[channel] = {}
+            
+        channel_log = timing_log[channel] 
         
+        fn_name = msg['function']
+        if fn_name not in channel_log:
+            channel_log[fn_name] = {
+                'avg_duration': msg['duration'],
+                'n_calls': 1
+            }
+        else:
+            avg_duration = channel_log[fn_name]['avg_duration']
+            n_calls = channel_log[fn_name]['n_calls']
+
+            n = n_calls + 1
+            mu = (msg['duration'] + n_calls * avg_duration) / n
+            channel_log[fn_name]['avg_duration'] = mu
+            channel_log[fn_name]['n_calls'] = n
+
+        return 'call registered'
+                
+
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=8080)
