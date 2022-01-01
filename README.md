@@ -1,5 +1,7 @@
 # Vizual
-Web / CLI based debug tools for easy cleant statement based debugging in python.
+- A CLI and Web UI for making print statement based debugging makes it easy to manage large diagnostic outputs from complex dev systems.
+
+- A @decorator based syntax for vizual won't leave you hunting for that last print() you still can't seem to spot hiding in your code! 
 
 ![Vizual](screenshot.png?raw=true "Powerful web based print statement debugging environment for python")
 
