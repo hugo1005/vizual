@@ -1,6 +1,8 @@
 # Vizual
 Web / CLI based debug tools for easy cleant statement based debugging in python.
 
+![Vizual](screenshot.png?raw=true "Powerful web based print statement debugging environment for python")
+
 ## Installation
 
 To install
