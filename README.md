@@ -3,6 +3,13 @@ Web / CLI based debug tools for easy cleant statement based debugging in python.
 
 ![Vizual](screenshot.png?raw=true "Powerful web based print statement debugging environment for python")
 
+### Features
+- Command line interface + Web UI
+- Multi channel console logs (+ Multi color)
+- If statement condition met checks (Pings)
+- Progress bars for tasks
+- Code timining / performance metrics
+
 ## Installation
 
 To install
