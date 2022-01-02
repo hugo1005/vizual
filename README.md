@@ -3,7 +3,7 @@
 
 - A @decorator based syntax for vizual won't leave you hunting for that last print() you still can't seem to spot hiding in your code! 
 
-![Vizual](screenshot.png?raw=true "Powerful web based print statement debugging environment for python")
+![Vizual](markdown_screenshots/screenshot.png?raw=true "Powerful web based print statement debugging environment for python")
 
 ### Features
 - Command line interface + Web UI
@@ -49,6 +49,8 @@ def f(...):
 ```
 
 ### Unit Testing in here
+![Vizual](markdown_screenshots/screenshot2.png?raw=true "Powerful web based print statement debugging environment for python")
+
 We have 3 types of decorations in vizual, test, dev and universal. 
 Decorators listed under test will be run in a seperate test environment to prevent side effects.
 Universal decorators will be applied to both test run and development run. Thus it is important that the channel
@@ -66,6 +68,8 @@ Unit tests will then be visible in the web ui under the appropriate channel labe
 def f(...):
   return ...
 ```
+
+
 
 ### Checking if a condition was met (Pinging)
 We can wrap a boolean function in a ping decorator, the function will 'Ping!' every time the condition is true.
