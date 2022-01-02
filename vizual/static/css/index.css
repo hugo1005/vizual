@@ -1,11 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Mono&display=swap');
 
 ::-webkit-scrollbar {
+  background: rgb(30,30,30);
   width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(30,30,30);
+
   border-left: .1px solid rgba(136, 136, 136, 0.308)
 }
   
@@ -69,15 +70,48 @@ body {
   overflow-y: scroll;
 }
 
-#performance_display {
+.drawer_display {
+  width: 100%;
   height: 35%;
+  display:flex; 
+  flex-direction: row; 
+  overflow-y: hidden;
+}
+
+.drawer_left_display {
+  height: 100%;
+  width: 50%;
   overflow-y: scroll;
   padding: 8px;
 }
 
+.drawer_right_display {
+  height: 100%;
+  width: 50%;
+  overflow-y: hidden;
+  padding: 0px;
+  display: flex;
+  flex-direction: row;
+  background-color: rgb(17, 17, 17);
+}
+
+.drawer_right_sub_display {
+  height: 100%;
+  width: 50%;
+  overflow-y: scroll;
+  padding: 8px;
+
+  color: rgb(182, 182, 182);
+  text-align: left;
+  font-family: 'Roboto', sans-serif;
+  
+  display: flex;
+  flex-direction: column;
+}
+
 table {
   width: 100%;
-  color: white;
+  color: rgb(182, 182, 182);
   text-align: left;
   font-family: 'Roboto', sans-serif;
   border-collapse:collapse;

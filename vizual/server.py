@@ -5,6 +5,7 @@ import logging
 # Server Side
 debug_log = {}
 timing_log = {}
+tests_log = {}
 MAIN_TASK = {'task_name':'Main', 'progress':0, 'total_iters': 1}
 tasks = []
 
@@ -80,7 +81,7 @@ def task(msgtype=None):
 
             return 'Task Progressed'
 
-@app.route('/timing', methods=['POST'])
+@app.route('/timing/<channel>', methods=['POST'])
 @app.route('/timing/<channel>', methods=['GET'])
 def timing(channel=None):
     global timing_log
@@ -90,7 +91,6 @@ def timing(channel=None):
     if request.method == 'POST':
         msg = request.json
 
-        channel = msg['channel']
         if channel not in timing_log:
             timing_log[channel] = {}
             
@@ -113,6 +113,28 @@ def timing(channel=None):
 
         return 'call registered'
                 
+@app.route('/tests/<channel>', methods=['POST'])
+@app.route('/tests/<channel>', methods=['GET'])
+def tests(channel=None):
+    global tests_log
+
+    if request.method == 'GET':
+        return jsonify(tests_log[channel] if channel in tests_log else {})
+
+    if request.method == 'POST':
+        msgs = request.json
+        # msgs must be a list of test results
+        for msg in msgs:
+            if channel not in tests_log:
+                tests_log[channel] = []
+
+            channel_log = tests_log[channel] 
+
+            if msg not in channel_log:
+                channel_log.append(msg)
+
+        return 'Tests logged'
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=8080)

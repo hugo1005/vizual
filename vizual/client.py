@@ -9,6 +9,43 @@ class Vizual:
         self._ip = server_ip
         self._channel_context = ''
         self._context_stack = []
+        self._is_test = True
+
+    def entry_point(self):
+        def entry_wrapper(entry_func):
+            def modified_func(*args, **kwargs):
+                # Run Test Mode
+                entry_func(*args, **kwargs)
+                self._is_test = False
+
+                # Run Dev Mode
+                return entry_func(*args, **kwargs)
+            return modified_func
+        return entry_wrapper
+
+    def _apply_decorators(self, f, d_fns):
+        f_prime = f
+        
+        for i in range(len(d_fns) - 1,-1,-1):
+            decorator = d_fns[i]
+            f_prime = decorator(f_prime)
+
+        return f_prime
+
+    def decorate(self, test = [], dev = [], universal = []):
+        def decorate_inner(f):
+            _test_f = self._apply_decorators(f, test)
+            _dev_f = self._apply_decorators(f, dev)
+
+            def modified_function(*args, **kwargs):
+                if self._is_test:
+                    return _test_f(*args, **kwargs)
+                else:
+                    return _dev_f(*args, **kwargs)
+
+            return self._apply_decorators(modified_function, universal)
+
+        return decorate_inner
 
     def _register_channel(self, channel):
         requests.post(self._ip + '/channels/%s' % channel, json=None)
@@ -25,16 +62,24 @@ class Vizual:
     def _pop_channel_context(self):
         self._context_stack.pop(-1)
 
-    def debug(self, channel, template, color='#fff', display_output=True): 
+    def label(self, channel):
         self._register_channel(channel)
 
-        def debug_decorator(func):
-            def wrapper(*args, **kwargs):
-                # Frist set the context
+        def label_decorator(func):
+            def modified_func(*args, **kwargs):
                 self._set_channel_context(channel)
                 evaluation = func(*args, **kwargs)
                 self._pop_channel_context()
 
+                return evaluation
+            return modified_func
+        return label_decorator
+
+    def debug(self, template, color='#fff', display_output=True): 
+        def debug_decorator(func):
+            def wrapper(*args, **kwargs):
+                # Frist set the context
+                evaluation = func(*args, **kwargs)
                 content = template % evaluation if display_output else template
 
                 msg = {
@@ -43,7 +88,7 @@ class Vizual:
                     'format': {'color': color}
                 }
 
-                self._send_debug_message(channel, msg)
+                self._send_debug_message(self._get_channel_context(), msg)
                 
                 return evaluation
             
@@ -104,6 +149,32 @@ class Vizual:
             return wrapper
         return ping_decorator
 
+    def unit_test(self, unit_test_fns):
+        # unit_test_fns: list of functions which accept the decorated function
+        # as the only argument and returns a boolean true = passed
+
+        def unit_test_decorator(func):
+            tests = [] # Trick to ensure we only run the tests once.
+            # Only wrapper gets called on each call of func()
+
+            def wrapper(*args, **kwargs):
+                if len(tests) == 0:
+                    for test_fn in unit_test_fns:
+                        msg = {
+                            'function': func.__name__,
+                            'test_name': test_fn.__name__,
+                            'is_passing': test_fn(func)
+                        }
+
+                        tests.append(msg)
+
+                    requests.post(self._ip + '/tests/%s' % self._get_channel_context(), json=tests)
+
+                return func(*args, **kwargs)
+
+            return wrapper
+        return unit_test_decorator
+
     def time(self):
         def time_decorator(func):
             def wrapper(*args, **kwargs):
@@ -114,12 +185,11 @@ class Vizual:
                 b = time()
 
                 msg = {
-                    'channel': channel,
                     'function': func.__name__,
                     'duration': b - a,
                 }
                     
-                requests.post(self._ip + '/timing', json=msg)
+                requests.post(self._ip + '/timing/%s' % channel, json=msg)
 
                 return eval
             return wrapper

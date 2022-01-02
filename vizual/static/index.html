@@ -13,10 +13,22 @@
         <div id='channel_display' class='data_display'>
     
         </div>
-        <div id='performance_display' class='data_display'>
-            <table id='performance_display_table'>
-                
-            </table>
+        <div class='drawer_display'>
+            <div id='performance_display' class='drawer_left_display data_display'>
+                <table id='performance_display_table'>
+                    
+                </table>
+            </div>
+            <div id='tests_display' class='drawer_right_display data_display'>
+                <div class='drawer_right_sub_display'>
+                    Tests Passing
+                    <div id='tests_passing' ></div>
+                </div>
+                <div class='drawer_right_sub_display'>
+                    Tests Failing
+                    <div id='tests_failing'></div>
+                </div>
+            </div>
         </div>
     </div>
     <div id='status_bar'>
@@ -51,11 +63,17 @@
         }
 
         findElem = id => document.getElementById(id)
-        function getHTML(templ, datalist) {
+        function getHTML(templ, datalist, filter = null) {
             if (datalist.length > 0) {
-                return datalist.map(
-                        item => templ(item)
-                    ).reduce((l,r) => l + r)
+                datalist = filter != null? datalist.filter(filter): datalist
+                
+                if (datalist.length > 0) {
+                    return datalist.map(
+                            item => templ(item)
+                        ).reduce((l,r) => l + r)
+                } else {
+                    return ''
+                }
             } else {
                 return ''
             }
@@ -65,6 +83,8 @@
         elem_channels = findElem('channels')
         elem_channel_display = findElem('channel_display')
         elem_perf_display_tbl = findElem('performance_display_table')
+        elem_passing = findElem('tests_passing')
+        elem_failing = findElem('tests_failing')
         elem_task = findElem('task')
 
         // Templates
@@ -95,6 +115,9 @@
                     <td>${perf.avg_duration}</td>
                     <td>${perf.avg_duration * perf.n_calls}</td>
                 </tr>`
+        
+        template_test_msg = msg => `
+        <div class='message'" style="color:${msg.is_passing?'green':'red'}">[ ${msg.test_name} ] on ${msg.function}() </div>`
 
         // App State
         state = {channel_ids: get('channels'), active_channel: ''}
@@ -109,6 +132,11 @@
                 func_names = Object.keys(data)
                 perf_list = func_names.map(f_name => {return {...data[f_name], function_name: f_name }})
                 elem_perf_display_tbl.innerHTML = perf_tabl_base +  getHTML(template_perf_tbl, perf_list)
+            })
+
+            get(`/tests/${cid}`).then(data => {
+                elem_passing.innerHTML = getHTML(template_test_msg, data, filter=test => test.is_passing)
+                elem_failing.innerHTML = getHTML(template_test_msg, data, filter=test => !test.is_passing)
             })
         }
 
