@@ -10,8 +10,9 @@
 - Multi channel console logs (+ Multi color)
 - If statement condition met checks (Pings)
 - Progress bars for tasks
-- Code timining / performance metrics
-- Unit test capabilities
+- Code timing / performance metrics
+- Unit test pass / fail
+- Decorator syntax for python
 
 ## Installation
 
