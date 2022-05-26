@@ -48,6 +48,18 @@ def f(...):
   return ...
 ```
 
+We can also display pandas tables using the following options. 
+The Tables label is not necessary, tables may be placed on any channel.
+Options can be specified for the summary_fn used (default is a wrapper of df.head())
+```
+@vz.decorate(
+    dev = [vz.table("Random Table Example")],
+    universal = [vz.label('Tables')]
+)
+def make_table():
+    return pd.DataFrame(np.random.normal(0,1, (100,10)))
+```
+
 ### Unit Testing in here
 ![Vizual](markdown_screenshots/screenshot2.png?raw=true "Powerful web based print statement debugging environment for python")
 
@@ -215,12 +227,21 @@ def generator2(n=100):
         generate_once(gen_number = choose_a_number())
 
 @vz.decorate(
+    dev = [vz.table("Random Table Example")],
+    universal = [vz.label('Tables')]
+)
+def make_table():
+    return pd.DataFrame(np.random.normal(0,1, (100,10)))
+
+@vz.decorate(
     dev = [vz.debug("Done", color='#fff', display_output=False)],
     universal = [vz.entry_point(), vz.label('Main')]
 )
 def main():
     generator()
     generator2()
+    make_table()
+
 
 if __name__ == '__main__':
     main()

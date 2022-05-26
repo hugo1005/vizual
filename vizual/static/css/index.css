@@ -30,9 +30,24 @@ body {
     overflow: hidden;
 }
 
+#header_panel {
+  width: 100vw;
+  height: 6vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+#header_panel img {
+  height: 32px;
+  padding-left: 16px;
+}
+
 #debug_panel {
     width: 100vw;
-    height: 100vh;
+    height: 94vh;
     padding-bottom: 32px;
     box-sizing: border-box;
 }

@@ -19,7 +19,7 @@ setup(
       url = 'https://github.com/hugo1005/vizual',
       download_url = 'https://github.com/hugo1005/vizual/archive/refs/tags/Beta.tar.gz',
       include_package_data=True,
-      install_requires=['Flask','requests','docopt'], # add any additional packages that
+      install_requires=['Flask','requests','docopt','pandas','numpy'], # add any additional packages that
       # needs to be installed along with your package. Eg: 'caer'
       
       keywords=['python', 'debugging', 'webapp', 'visual'],

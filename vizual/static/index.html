@@ -5,6 +5,9 @@
     <link rel="shortcut icon" type="image/jpg" href="./assets/favicon.ico"/>
 </head>
 <body>
+    <div id='header_panel'>
+        <img src="./assets/logo.png">
+    </div>
     <div id='debug_panel'>
         <div id='channels'>
             <!-- <div id='<channel-id>' 
@@ -95,6 +98,17 @@
         template_channel_msg = msg => `
         <div id='msg_${msg.timestamp}' class='message'" style="color:${msg.format.color}">[${getTime(msg.timestamp)}] ${msg.message} </div>`
 
+        template_channel_table = msg => `
+        <div id='msg_${msg.timestamp}' class='table_message' style="color:${msg.format.color}">[${getTime(msg.timestamp)}] ${msg.table_name} ${msg.table} </div>`
+
+        template_channel_msg_or_table = function(msg) {
+            if("table" in msg) {
+                return template_channel_table(msg)
+            } else {
+                return template_channel_msg(msg)
+            }
+        }
+
         template_task = task => `
             <div id='task_name'>${task.task_name} (${task.progress}/${task.total_iters})</div>
             <div id='task_bar'>
@@ -125,7 +139,12 @@
         // App Actions
         function update_channel_body (cid) {
             get(`/channels/${cid}`).then(msgs => {
-                elem_channel_display.innerHTML = getHTML(template_channel_msg, msgs)
+                // if(cid == 'Tables') {
+                //     elem_channel_display.innerHTML = getHTML(template_channel_msg_or_table, msgs)
+                // } else {
+                //     elem_channel_display.innerHTML = getHTML(template_channel_msg, msgs)
+                // }
+                elem_channel_display.innerHTML = getHTML(template_channel_msg_or_table, msgs)
             })
 
             get(`/timing/${cid}`).then(data => {

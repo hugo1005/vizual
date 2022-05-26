@@ -1,15 +1,30 @@
 from time import time, sleep
+import pandas as pd
 import requests
 
-# Todo Add Testing and Performance Metrics!
+def table_head(df):
+        return df.head()
 
 class Vizual:
-    def __init__(self, server_ip='http://0.0.0.0:8080'):
+    def __init__(self, server_ip='http://0.0.0.0:8080', live_post=False):
         sleep(1)
         self._ip = server_ip
         self._channel_context = ''
         self._context_stack = []
         self._is_test = True
+        self.message_q = []
+        self.live_post = live_post
+
+    def post(self, url, msg=None):
+        if self.live_post:
+            requests.post(self._ip + url, json=msg)
+        else:
+            self.message_q.append([url, msg])
+
+    def _post_messages(self):
+        while len(self.message_q) > 0:
+            url, msg = self.message_q.pop(0)
+            requests.post(self._ip + url, json=msg)
 
     def entry_point(self):
         def entry_wrapper(entry_func):
@@ -19,7 +34,11 @@ class Vizual:
                 self._is_test = False
 
                 # Run Dev Mode
-                return entry_func(*args, **kwargs)
+                res = entry_func(*args, **kwargs)
+                
+                # Transmit all messages once programme has ended
+                self._post_messages()
+                return res
             return modified_func
         return entry_wrapper
 
@@ -48,10 +67,10 @@ class Vizual:
         return decorate_inner
 
     def _register_channel(self, channel):
-        requests.post(self._ip + '/channels/%s' % channel, json=None)
+        self.post('/channels/%s' % channel, None)
 
     def _send_debug_message(self, channel, msg):
-        requests.post(self._ip + '/channels/%s' % channel, json=msg)
+        self.post('/channels/%s' % channel, msg)
 
     def _set_channel_context(self, channel):
         self._context_stack.append(channel)
@@ -74,6 +93,24 @@ class Vizual:
                 return evaluation
             return modified_func
         return label_decorator
+
+    def table(self, table_name, color='#fff', summary_fn = table_head):
+        def table_decorator(func):
+            def wrapper(*args, **kwargs):
+                table_eval = func(*args, **kwargs)
+                
+                msg = {
+                    'timestamp': time(),
+                    'table': summary_fn(table_eval).to_html(border=0),
+                    'table_name': table_name,
+                    'format': {'color': color}
+                }
+
+                self._send_debug_message(self._get_channel_context(), msg)
+                
+                return table_eval
+            return wrapper
+        return table_decorator
 
     def debug(self, template, color='#fff', display_output=True): 
         def debug_decorator(func):
@@ -104,7 +141,7 @@ class Vizual:
                     'total_iters': total_iters,
                 }
 
-                requests.post(self._ip + '/task/new', json=msg)
+                self.post('/task/new', msg)
 
                 # Pass thru the intercepted value
                 return func(*args, **kwargs)
@@ -120,7 +157,7 @@ class Vizual:
                     'increment': increment,
                 }
 
-                requests.post(self._ip + '/task/update', json=msg)
+                self.post('/task/update', msg)
 
                 # Pass thru the intercepted value
                 return func(*args, **kwargs)
@@ -143,7 +180,7 @@ class Vizual:
                         'format': {'color': color}
                     }
                     
-                    requests.post(self._ip + '/channels/%s' % self._get_channel_context(), json=msg)
+                    self.post('/channels/%s' % self._get_channel_context(), msg)
 
                 return criteria_met
             return wrapper
@@ -168,7 +205,7 @@ class Vizual:
 
                         tests.append(msg)
 
-                    requests.post(self._ip + '/tests/%s' % self._get_channel_context(), json=tests)
+                    self.post('/tests/%s' % self._get_channel_context(), tests)
 
                 return func(*args, **kwargs)
 
@@ -189,7 +226,7 @@ class Vizual:
                     'duration': b - a,
                 }
                     
-                requests.post(self._ip + '/timing/%s' % channel, json=msg)
+                self.post('/timing/%s' % channel, msg)
 
                 return eval
             return wrapper
