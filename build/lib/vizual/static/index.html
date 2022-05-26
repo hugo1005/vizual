@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel='stylesheet' href='./css/index.css'>
+    <link rel="shortcut icon" type="image/jpg" href="./assets/favicon.ico"/>
+</head>
+<body>
+    <div id='header_panel'>
+        <img src="./assets/logo.png">
+    </div>
+    <div id='debug_panel'>
+        <div id='channels'>
+            <!-- <div id='<channel-id>' 
+                class='channel ?selected'> <channel-id> </div>-->
+        </div>  
+        <div id='channel_display' class='data_display'>
+    
+        </div>
+        <div class='drawer_display'>
+            <div id='performance_display' class='drawer_left_display data_display'>
+                <table id='performance_display_table'>
+                    
+                </table>
+            </div>
+            <div id='tests_display' class='drawer_right_display data_display'>
+                <div class='drawer_right_sub_display'>
+                    Tests Passing
+                    <div id='tests_passing' ></div>
+                </div>
+                <div class='drawer_right_sub_display'>
+                    Tests Failing
+                    <div id='tests_failing'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id='status_bar'>
+        <div id='clear_btn' onclick="actions.clear_channels()">CLEAR</div>
+        <div id='task'>
+            
+        </div>
+    </div>
+    <script>
+
+        function getTime(unix_timestamp) {
+            // multiplied by 1000 so that the argument is in milliseconds, not seconds.
+            var date = new Date(unix_timestamp * 1000);
+            var hours = date.getHours();
+            var minutes = "0" + date.getMinutes();
+            var seconds = "0" + date.getSeconds();
+            var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+            return formattedTime
+        }
+
+        // Helper Functions
+        async function get(url) {
+            let response = await fetch(url);
+            let data = await response.json();
+            return data;
+        }
+
+        async function post(url) {
+            await fetch(url, {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            });
+        }
+
+        findElem = id => document.getElementById(id)
+        function getHTML(templ, datalist, filter = null) {
+            if (datalist.length > 0) {
+                datalist = filter != null? datalist.filter(filter): datalist
+                
+                if (datalist.length > 0) {
+                    return datalist.map(
+                            item => templ(item)
+                        ).reduce((l,r) => l + r)
+                } else {
+                    return ''
+                }
+            } else {
+                return ''
+            }
+            
+        }
+        // HTML Elements
+        elem_channels = findElem('channels')
+        elem_channel_display = findElem('channel_display')
+        elem_perf_display_tbl = findElem('performance_display_table')
+        elem_passing = findElem('tests_passing')
+        elem_failing = findElem('tests_failing')
+        elem_task = findElem('task')
+
+        // Templates
+        template_channel_li = cid => `
+        <div id='channel_${cid}' class='channel' 
+        onclick="actions.set_active_channel('${cid}')"> ${cid} </div>`
+
+        template_channel_msg = msg => `
+        <div id='msg_${msg.timestamp}' class='message'" style="color:${msg.format.color}">[${getTime(msg.timestamp)}] ${msg.message} </div>`
+
+        template_channel_table = msg => `
+        <div id='msg_${msg.timestamp}' class='table_message' style="color:${msg.format.color}">[${getTime(msg.timestamp)}] ${msg.table_name} ${msg.table} </div>`
+
+        template_channel_msg_or_table = function(msg) {
+            if("table" in msg) {
+                return template_channel_table(msg)
+            } else {
+                return template_channel_msg(msg)
+            }
+        }
+
+        template_task = task => `
+            <div id='task_name'>${task.task_name} (${task.progress}/${task.total_iters})</div>
+            <div id='task_bar'>
+                <div id='task_inner' style="width:${100*(task.progress/task.total_iters)}%"></div>
+            </div>`
+        
+        perf_tabl_base = `<tr>
+                <th>Function name</th>
+                <th># Calls</th>
+                <th>Avg Duration</th>
+                <th>Total Time</th>
+            </tr>`
+
+        template_perf_tbl = perf => `
+                <tr>
+                    <td>${perf.function_name}</td>
+                    <td>${perf.n_calls}</td>
+                    <td>${perf.avg_duration}</td>
+                    <td>${perf.avg_duration * perf.n_calls}</td>
+                </tr>`
+        
+        template_test_msg = msg => `
+        <div class='message'" style="color:${msg.is_passing?'green':'red'}">[ ${msg.test_name} ] on ${msg.function}() </div>`
+
+        // App State
+        state = {channel_ids: get('channels'), active_channel: ''}
+        
+        // App Actions
+        function update_channel_body (cid) {
+            get(`/channels/${cid}`).then(msgs => {
+                // if(cid == 'Tables') {
+                //     elem_channel_display.innerHTML = getHTML(template_channel_msg_or_table, msgs)
+                // } else {
+                //     elem_channel_display.innerHTML = getHTML(template_channel_msg, msgs)
+                // }
+                elem_channel_display.innerHTML = getHTML(template_channel_msg_or_table, msgs)
+            })
+
+            get(`/timing/${cid}`).then(data => {
+                func_names = Object.keys(data)
+                perf_list = func_names.map(f_name => {return {...data[f_name], function_name: f_name }})
+                elem_perf_display_tbl.innerHTML = perf_tabl_base +  getHTML(template_perf_tbl, perf_list)
+            })
+
+            get(`/tests/${cid}`).then(data => {
+                elem_passing.innerHTML = getHTML(template_test_msg, data, filter=test => test.is_passing)
+                elem_failing.innerHTML = getHTML(template_test_msg, data, filter=test => !test.is_passing)
+            })
+        }
+
+        function update_task_progress () {
+            get('/task').then(task => {
+                elem_task.innerHTML = template_task(task)
+            })
+        }
+        
+        actions = {
+            set_active_channel: cid => {
+                // Update Headers
+                [...elem_channels.children].map(
+                    c => {
+                        is_match = `channel_${cid}` == c.id
+                        cl = 'active_channel'
+                        is_match? c.classList.add(cl) : c.classList.remove(cl)
+                    }
+                )
+
+                // Update Body
+                update_channel_body(cid)
+                state.active_channel = cid
+            },
+            clear_channels: () => {
+                post("/reset/channels").then((update_channel_body(state.active_channel)))
+            }
+        }
+
+        // Logic
+        async function logic() {
+            // Init view
+            state.channel_ids.then(cids => {
+                elem_channels.innerHTML = getHTML(template_channel_li, cids)
+                actions.set_active_channel(cids[0])
+            })
+            update_task_progress()
+
+            // Loop and check for more
+            while (true) {
+                await new Promise(resolve => setTimeout(resolve, 500)); 
+
+                if(state.active_channel) {
+                    update_channel_body(state.active_channel)
+                }
+                update_task_progress()
+            }
+        }
+
+        logic()
+
+
+    </script>
+</body>
+</html>

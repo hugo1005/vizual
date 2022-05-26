@@ -17,14 +17,14 @@ setup(
       },
       # This needs to be changed on each new release
       url = 'https://github.com/hugo1005/vizual',
-      download_url = 'https://github.com/hugo1005/vizual/archive/refs/tags/Beta.tar.gz',
+      download_url = 'https://github.com/hugo1005/vizual/archive/refs/tags/v3.tar.gz',
       include_package_data=True,
       install_requires=['Flask','requests','docopt','pandas','numpy'], # add any additional packages that
       # needs to be installed along with your package. Eg: 'caer'
       
       keywords=['python', 'debugging', 'webapp', 'visual'],
       classifiers= [
-                    "Development Status :: 1 - Alpha",
+                    "Development Status :: 5 - Production/Stable",
                     "Intended Audience :: Developers",
                     "Programming Language :: Python :: 2",
                     "Programming Language :: Python :: 3",
