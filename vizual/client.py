@@ -1,6 +1,7 @@
 from time import time, sleep
 import pandas as pd
 import requests
+from io import BytesIO
 
 def table_head(df):
         return df.head()
@@ -15,16 +16,16 @@ class Vizual:
         self.message_q = []
         self.live_post = live_post
 
-    def post(self, url, msg=None):
+    def post(self, url, msg=None, files=None):
         if self.live_post:
-            requests.post(self._ip + url, json=msg)
+            requests.post(self._ip + url, json=msg, files=files)
         else:
-            self.message_q.append([url, msg])
+            self.message_q.append([url, msg, files])
 
     def _post_messages(self):
         while len(self.message_q) > 0:
-            url, msg = self.message_q.pop(0)
-            requests.post(self._ip + url, json=msg)
+            url, msg, files = self.message_q.pop(0)
+            requests.post(self._ip + url, json=msg, files=files)
 
     def entry_point(self):
         def entry_wrapper(entry_func):
@@ -111,6 +112,33 @@ class Vizual:
                 return table_eval
             return wrapper
         return table_decorator
+
+    def figure(self, fig_name, color='#fff'):
+        def figure_decorator(func):
+            def wrapper(*args, **kwargs):
+                fig = func(*args, **kwargs)
+                
+                figdata = BytesIO()
+                fig.savefig(figdata, format='png')
+                
+                filename = fig_name + '.png'
+                files = {filename: figdata.getvalue()}
+                self.post('/uploads/%s' % filename, files=files)
+                figdata.close()
+
+                msg = {
+                    'timestamp': time(),
+                    'figure': "<img src='/uploads/%s' width=300px>" % filename,
+                    'figure_name': fig_name,
+                    'format': {'color': color}
+                }
+
+                self._send_debug_message(self._get_channel_context(), msg)
+
+                return fig
+
+            return wrapper
+        return figure_decorator
 
     def debug(self, template, color='#fff', display_output=True): 
         def debug_decorator(func):

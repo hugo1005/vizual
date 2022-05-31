@@ -1,6 +1,9 @@
 import json
 from flask import Flask, jsonify, request
 import logging
+import os
+from os.path import join, dirname, realpath
+from PIL import Image
 
 # Server Side
 debug_log = {}
@@ -9,7 +12,11 @@ tests_log = {}
 MAIN_TASK = {'task_name':'Main', 'progress':0, 'total_iters': 1}
 tasks = []
 
+UPLOAD_FOLDER = join(dirname(realpath(__file__)), 'static/uploads/')
+
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 # Disable flask printing
 log = logging.getLogger('werkzeug')
 log.disabled = True
@@ -25,6 +32,24 @@ def stylesheets(name):
 @app.route("/assets/<name>", methods=['GET'])
 def assets(name):
     return app.send_static_file("./assets/%s" % name)
+
+@app.route("/uploads/<name>", methods=['GET', 'POST'])
+def uploads(name):
+    if request.method == 'GET':
+        return app.send_static_file("./uploads/%s" % name)
+    elif request.method == 'POST':
+        file = request.files[name]
+        
+        if file:
+            img = Image.open(file.stream)
+            img.save(os.path.join(app.config['UPLOAD_FOLDER'], name))
+            return 'File Saved'
+        else:
+            return 'No File Found'
+    else:
+        return 'Request Invalid'
+
+    
 
 @app.route('/channels', methods=['GET'])
 @app.route('/channels/<name>', methods=['GET', 'POST'])

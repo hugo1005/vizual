@@ -101,10 +101,17 @@
         template_channel_table = msg => `
         <div id='msg_${msg.timestamp}' class='table_message' style="color:${msg.format.color}">[${getTime(msg.timestamp)}] ${msg.table_name} ${msg.table} </div>`
 
+        template_channel_figure = msg => `
+        <div id='msg_${msg.timestamp}' class='table_message' style="color:${msg.format.color}">[${getTime(msg.timestamp)}] ${msg.figure_name} <br> <br> ${msg.figure} </div>`
+
         template_channel_msg_or_table = function(msg) {
             if("table" in msg) {
                 return template_channel_table(msg)
-            } else {
+            }
+            else if("figure" in msg) {
+                return template_channel_figure(msg)
+            }
+            else {
                 return template_channel_msg(msg)
             }
         }
@@ -139,11 +146,6 @@
         // App Actions
         function update_channel_body (cid) {
             get(`/channels/${cid}`).then(msgs => {
-                // if(cid == 'Tables') {
-                //     elem_channel_display.innerHTML = getHTML(template_channel_msg_or_table, msgs)
-                // } else {
-                //     elem_channel_display.innerHTML = getHTML(template_channel_msg, msgs)
-                // }
                 elem_channel_display.innerHTML = getHTML(template_channel_msg_or_table, msgs)
             })
 
@@ -196,7 +198,7 @@
 
             // Loop and check for more
             while (true) {
-                await new Promise(resolve => setTimeout(resolve, 500)); 
+                await new Promise(resolve => setTimeout(resolve,5000)); 
 
                 if(state.active_channel) {
                     update_channel_body(state.active_channel)
