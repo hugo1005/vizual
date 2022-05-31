@@ -4,6 +4,7 @@ from vizual.client import Vizual
 from example_unit_tests import gen_type_check, gen_range_check, len_output_check, failing_test
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 vz = Vizual()
 
@@ -77,10 +78,28 @@ def make_table():
     return pd.DataFrame(np.random.normal(0,1, (100,10)))
 
 @vz.decorate(
+    dev = [vz.figure("example_fig")],
+    universal = [vz.label('Figures')]
+)
+def make_figure():
+    fig = plt.figure()
+    
+    x = np.linspace(0,10,50)
+    err = np.random.normal(0,1, 50)
+    y = 5 * x + err
+    z = 10 * x * y + err
+    plt.subplot2grid((1,2),(0,0))
+    plt.plot(x,y)
+    plt.subplot2grid((1,2),(0,1))
+    plt.plot(x,z)
+    return fig
+
+@vz.decorate(
     dev = [vz.debug("Done", color='#fff', display_output=False)],
     universal = [vz.entry_point(), vz.label('Main')]
 )
 def main():
+    make_figure()
     generator()
     generator2()
     make_table()
