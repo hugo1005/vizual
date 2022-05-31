@@ -49,9 +49,9 @@ def f(...):
   return ...
 ```
 
-We can also display pandas tables using the following options. 
-The Tables label is not necessary, tables may be placed on any channel.
-Options can be specified for the summary_fn used (default is a wrapper of df.head())
+We can also display pandas tables and matplotlib figures using the following options. 
+Tables and figures may be placed on any channel.
+Options for tables can be specified for the summary_fn used (default is a wrapper of df.head())
 ```
 @vz.decorate(
     dev = [vz.table("Random Table Example")],
@@ -59,6 +59,23 @@ Options can be specified for the summary_fn used (default is a wrapper of df.hea
 )
 def make_table():
     return pd.DataFrame(np.random.normal(0,1, (100,10)))
+
+@vz.decorate(
+    dev = [vz.figure("example_fig")],
+    universal = [vz.label('Figures')]
+)
+def make_figure():
+    fig = plt.figure()
+    
+    x = np.linspace(0,10,50)
+    err = np.random.normal(0,1, 50)
+    y = 5 * x + err
+    z = 10 * x * y + err
+    plt.subplot2grid((1,2),(0,0))
+    plt.plot(x,y)
+    plt.subplot2grid((1,2),(0,1))
+    plt.plot(x,z)
+    return fig
 ```
 
 ### Unit Testing in here
@@ -157,93 +174,4 @@ Open http://0.0.0.0:8080 in your browser!
 Use ctrl-c as usual, note the termination is not particularly graceful currently but functional.
 
 ## Example application:
-```
-import random
-from time import sleep
-from vizual.client import Vizual
-from example_unit_tests import gen_type_check, gen_range_check, len_output_check, failing_test
-
-vz = Vizual()
-
-# Start Code
-@vz.decorate(
-    dev = [
-        vz.debug("The random number is %s", color='#fff'),
-        vz.time()
-    ],
-    universal = [vz.label('Random Number')]
-)
-def generate_number():
-    return random.random()
-
-@vz.decorate(
-    dev = [
-        vz.debug("The random string is %s", color='#FF0000'),
-        vz.time()
-    ],
-    universal = [vz.label('Random String')]
-)
-def generate_string():
-    return random.choice(['A','B','C'])
-
-@vz.decorate(
- dev = [vz.ping()]
-)
-def choose_a_number():
-    return random.choice([True, False])
-
-@vz.decorate(
-    test = [vz.unit_test([gen_type_check, gen_range_check])],
-    dev = [
-        vz.debug("Generating %s", color='#fff'),
-        vz.task_progress(1), 
-        vz.time()
-    ],
-    universal = [vz.label('Generator Function')]
-)
-def generate_once(gen_number = True):
-    if gen_number:
-        res = generate_number()
-    else:
-        res = generate_string()
-
-    return res
-
-@vz.decorate(
-    test = [vz.unit_test([len_output_check, failing_test])],
-    dev = [vz.task('Generating Random Numbers', 100),vz.time()]
-)
-def generator(n=100):
-    l = []
-    for i in range(n):
-        l.append(generate_once(gen_number = choose_a_number()))
-
-    return l
-
-@vz.decorate(
-    dev = [vz.task('Some more random numbers', 100),vz.time()]
-)
-def generator2(n=100):
-    for i in range(n):
-        generate_once(gen_number = choose_a_number())
-
-@vz.decorate(
-    dev = [vz.table("Random Table Example")],
-    universal = [vz.label('Tables')]
-)
-def make_table():
-    return pd.DataFrame(np.random.normal(0,1, (100,10)))
-
-@vz.decorate(
-    dev = [vz.debug("Done", color='#fff', display_output=False)],
-    universal = [vz.entry_point(), vz.label('Main')]
-)
-def main():
-    generator()
-    generator2()
-    make_table()
-
-
-if __name__ == '__main__':
-    main()
-```
+See example.py!

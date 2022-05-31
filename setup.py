@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 setup(
       # the name must match the folder name 'verysimplemodule'
       name="vizual",
-      version="0.0.1",
+      version="4.0.0",
       author="Hugo Dolan",
       author_email="<hugojdolan@gmail.com>",
       description="Web UI and decorator synatx for print statement debugging",
